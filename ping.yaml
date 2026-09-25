@@ -1,6 +1,7 @@
 ---
-- name: Ping Linux Server and Get Hostname
+- name: Ping Linux Server and Create User
   hosts: all
+  become: true
   gather_facts: true
 
   tasks:
@@ -14,3 +15,9 @@
     - name: Display hostname
       ansible.builtin.debug:
         msg: "Hostname: {{ hostname_output.stdout }}"
+
+    - name: Create user
+      ansible.builtin.user:
+        name: devuser
+        state: present
+        create_home: true
