@@ -1,0 +1,86 @@
+---
+- name: Linux Server Administration
+  hosts: linux-server
+  become: true
+  gather_facts: true
+
+  tasks:
+
+    - name: Display hostname
+      ansible.builtin.debug:
+        var: ansible_hostname
+
+    - name: Check disk usage
+      ansible.builtin.command: df -h /
+      register: disk_usage
+      changed_when: false
+
+    - name: Display disk usage
+      ansible.builtin.debug:
+        var: disk_usage.stdout_lines
+
+    - name: Check memory
+      ansible.builtin.command: free -h
+      register: memory_usage
+      changed_when: false
+
+    - name: Display memory usage
+      ansible.builtin.debug:
+        var: memory_usage.stdout_lines
+
+    - name: Check uptime
+      ansible.builtin.command: uptime
+      register: uptime_output
+      changed_when: false
+
+    - name: Display uptime
+      ansible.builtin.debug:
+        var: uptime_output.stdout
+
+    - name: Create application user
+      ansible.builtin.user:
+        name: appuser
+        state: present
+        create_home: true
+        shell: /bin/bash
+
+    - name: Install required packages
+      ansible.builtin.package:
+        name:
+          - git
+          - curl
+          - vim
+        state: present
+        update_cache: true
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: /opt/myapp
+        state: directory
+        owner: appuser
+        group: appuser
+        mode: "0755"
+
+    - name: Create application configuration
+      ansible.builtin.copy:
+        dest: /opt/myapp/app.conf
+        content: |
+          APP_NAME=myapp
+          APP_ENV=production
+          SERVER={{ ansible_hostname }}
+        owner: appuser
+        group: appuser
+        mode: "0644"
+
+    - name: Verify application directory
+      ansible.builtin.stat:
+        path: /opt/myapp
+      register: app_directory
+
+    - name: Show final status
+      ansible.builtin.debug:
+        msg:
+          - "Hostname: {{ ansible_hostname }}"
+          - "Application directory created: {{ app_directory.stat.exists }}"
+          - "Application user: appuser"
+          - "Server configuration completed"
