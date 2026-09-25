@@ -1,8 +1,16 @@
 ---
-- name: Ping Linux Server
+- name: Ping Linux Server and Get Hostname
   hosts: all
-  gather_facts: false
+  gather_facts: true
 
   tasks:
     - name: Ping server
       ansible.builtin.ping:
+
+    - name: Get hostname
+      ansible.builtin.command: hostname
+      register: hostname_output
+
+    - name: Display hostname
+      ansible.builtin.debug:
+        msg: "Hostname: {{ hostname_output.stdout }}"
