@@ -84,3 +84,13 @@
           - "Application directory created: {{ app_directory.stat.exists }}"
           - "Application user: appuser"
           - "Server configuration completed"
+
+    - name: Save server information to file
+      ansible.builtin.copy:
+        dest: /tmp/server-info.txt
+        content: |
+          Hostname: {{ ansible_hostname }}
+          Application directory created: {{ app_directory.stat.exists }}
+          Application user: appuser
+          Server configuration completed
+        mode: "0644"
